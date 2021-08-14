@@ -1,0 +1,126 @@
+{% extends 'shop/basic.html' %} {% block title%} Checkout - My Awesome Cart{% endblock %}
+{% block body %}
+<div class="container">
+  <div class="col my-4">
+    <h2 class="my-4">
+      Step 1 - My Awesome Cart Express Checkout - Review Your Cart Items
+    </h2>
+    <div>
+      <ul class="list-group" id="items"></ul>
+      <div class="totaldiv my-3"><p id="total"></p></div>
+    </div>
+  </div>
+  <div class="col my-4">
+    <h2 class="my-4">Step 2 - Enter Address & Other Details:</h2>
+    <form method="POST" accept="/shop/checkout">{% csrf_token %}
+      <input type="hidden" name="itemsJson" id="itemsJson">
+      <input type="hidden" name="amount" id="amount">
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="name">Name</label>
+          <input
+            type="text"
+            name="name"
+            class="form-control"
+            id="name"
+            placeholder="Name"
+          />
+        </div>
+        <div class="form-group col-md-6">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            name='email'
+            class="form-control"
+            id="email"
+            placeholder="Email"
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="address1">Address</label>
+        <input
+          type="text"
+          name='address1'
+          class="form-control"
+          id="address1"
+          placeholder="1234 Main St"
+        />
+      </div>
+      <div class="form-group">
+        <label for="address2">Address line 2</label>
+        <input
+          type="text"
+          name="address2"
+          class="form-control"
+          id="address2"
+          placeholder="Apartment, studio, or floor"
+        />
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="city">City</label>
+          <input type="text" class="form-control" name="city" id="city" />
+        </div>
+        <div class="form-group col-md-4">
+          <label for="state">State</label>
+          <input
+            type="text"
+            name="state"
+            class="form-control"
+            id="state"
+            placeholder="Enter State"
+          />
+        </div>
+        <div class="form-group col-md-2">
+          <label for="zip_code">Zip</label>
+          <input type="text" class="form-control" id="zip_code" name="zip_code"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" class="form-control" id="phone" name="phone"/>
+      </div>
+      <button type="submit" class="btn btn-primary">Place Order</button>
+    </form>
+  </div>
+</div>
+{% endblock %} {% block js %}
+<script>
+      if (localStorage.getItem('cart') == null) {
+      var cart = {};
+  } else {
+      cart = JSON.parse(localStorage.getItem('cart'));
+  }
+  sum = 0;
+  totalprice = 0 
+  if ($.isEmptyObject(cart)){
+    mystr = `<p>Your cart is empty, please add some items to your cart before checking out!</p>`
+      $('#items').append(mystr);
+  }
+  else{
+  for(item in cart){
+      let name = cart[item][1];
+      let qty = cart[item][0];
+      let price = cart[item][2];
+      totalprice = totalprice + (Number(price.slice(3,))*qty)
+      sum = sum + qty
+      mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                      ${name} - ${price}
+                      <span class="badge badge-primary badge-pill">${qty}</span>
+                  </li>`
+      $('#items').append(mystr);
+  }}
+  document.getElementById('cart').innerHTML = sum;
+  document.getElementById('total').innerHTML = `Total: <b>Rs.${totalprice}</b>`;
+  $('#itemsJson').val(JSON.stringify(cart));
+  {% if thank %}
+  alert('Thanks for ordering with us. Your order id is {{id}}. Use it to track your order using our order tracker')
+  localStorage.clear()
+  document.location = '/shop';
+  {% endif %}
+  $('#amount').val(totalprice)
+  console.log("*****", totalprice);
+</script>
+
+{% endblock %}
